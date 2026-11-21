@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from dominio.errores import ValidacionError
-from funcional.puras import calcular_minutos, calcular_dias # Acá traemos la función pura que calcula los minutos a cobrar
+from funcional.puras import calcular_minutos, calcular_dias, fecha_termino_suscripcion # Acá traemos la función pura que calcula los minutos a cobrar
 
 # Tarifas en pesos chilenos (Ojo que podemos cambiarlas pero, es más entendible asi y hay que anotarlas en el README)
 TARIFA_MINUTO = 30
@@ -76,3 +76,30 @@ class Diaria(ModalidadCobro):
     def calcular_importe(self, ingreso: datetime, salida: datetime) -> int:
         # Su fórmula: días a cobrar (bloques de 24 h, hacia arriba) por la tarifa.
         return calcular_dias(ingreso, salida) * self.tarifa
+
+
+class Mensual(ModalidadCobro):
+    """Modalidad mensual: pago fijo por una suscripción de 30 días consecutivos."""
+
+    def __init__(self, tarifa: int = TARIFA_MENSUAL):
+        # Igual que las otras: el padre guarda y valida el nombre y la tarifa.
+        super().__init__("mensual", tarifa)
+
+    def importe_contratacion(self) -> int:
+        """Pago fijo que se registra AL CONTRATAR la suscripción."""
+        # Concepto 1: contratar la suscripción SÍ genera un pago (la tarifa mensual).
+        # Este método solo existe en Mensual, porque solo ella se contrata.
+        return self.tarifa
+
+    def fecha_termino(self, inicio: datetime) -> datetime:
+        """Fecha en que termina la suscripción (30 días después, exclusive)."""
+        # Reutiliza la función pura que ya hicimos en puras.py
+        return fecha_termino_suscripcion(inicio)
+
+    def calcular_importe(self, ingreso: datetime, salida: datetime) -> int:
+        """Cobro al finalizar una estadía cubierta por la suscripción: siempre $0."""
+        # Concepto 2: finalizar una estadía cubierta NO genera un cobro adicional.
+        # Igual validamos que la salida no sea anterior al ingreso.
+        if salida < ingreso:
+            raise ValidacionError("La fecha de salida no puede ser anterior al ingreso.")
+        return 0
