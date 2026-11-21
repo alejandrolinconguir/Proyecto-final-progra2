@@ -50,3 +50,13 @@ def esta_vigente(inicio: datetime, termino: datetime, ahora: datetime) -> bool:
     # ahora < termino: en la fecha exacta de término ya NO está vigente (exclusive).
     # La fecha de referencia "ahora" llega como argumento, por eso la función es pura.
     return inicio <= ahora < termino
+
+
+def hay_superposicion(inicio_a: datetime, termino_a: datetime,
+                      inicio_b: datetime, termino_b: datetime) -> bool:
+    """True si dos períodos [inicio, termino) se superponen."""
+    # Compara dos períodos, que en este caso son A y B, y devuelve True si se cruzan en el tiempo.
+    # Se superponen cuando A empieza antes de que B termine Y B empieza antes de que A termine.
+    # Usamos < (y no <=) porque el término es exclusivo: si uno termina justo
+    # cuando el otro empieza, NO hay superposición.
+    return inicio_a < termino_b and inicio_b < termino_a
