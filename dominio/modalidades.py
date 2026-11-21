@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from dominio.errores import ValidacionError
+from funcional.puras import calcular_minutos # Acá traemos la función pura que calcula los minutos a cobrar
 
 # Tarifas en pesos chilenos (Ojo que podemos cambiarlas pero, es más entendible asi y hay que anotarlas en el README)
 TARIFA_MINUTO = 30
@@ -49,3 +50,17 @@ class ModalidadCobro(ABC):
     @abstractmethod
     def calcular_importe(self, ingreso: datetime, salida: datetime) -> int:
         """Importe a cobrar al FINALIZAR una estadía. Cada subclase lo define."""
+
+
+class PorMinuto(ModalidadCobro):
+    """Modalidad por minuto: se cobra una tarifa por cada minuto de permanencia."""
+
+    def __init__(self, tarifa: int = TARIFA_MINUTO): # Si  no le pasamos una tarifa usa 30 por defecto
+        # super().__init__ llama al constructor de la clase padre (ModalidadCobro),
+        # que se encarga de guardar y validar el nombre y la tarifa.
+        super().__init__("minuto", tarifa)
+
+    def calcular_importe(self, ingreso: datetime, salida: datetime) -> int:
+        # Esta es SU fórmula: minutos a cobrar (redondeados hacia arriba) por la tarifa.
+        # self.tarifa usa el getter de la clase padre.
+        return calcular_minutos(ingreso, salida) * self.tarifa
