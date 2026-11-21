@@ -1,6 +1,7 @@
 """Consultas y reportes con programación funcional (filter, map, reduce, lambda)."""
 # reduce sirve para acumular una colección de valores en uno solo
-from functools import reduce
+from functools import reduce 
+from funcional.puras import esta_vigente # Traemos la función pura que dice si una suscripción está vigente
 
 # Nombres de las tres modalidades de cobro
 MODALIDADES = ("minuto", "diaria", "mensual")
@@ -66,3 +67,14 @@ def pagos_a_filas(pagos):
                                p.modalidad,
                                f"${p.monto:,}".replace(",", ".")),
                     ordenados))
+
+
+
+def suscripciones_vigentes(suscripciones, ahora):
+    """Devuelve solo las suscripciones que están vigentes en la fecha 'ahora'."""
+    # filter se queda con las suscripciones que cumplen la condición.
+    # La lambda le pregunta a esta_vigente (de puras.py) si cada suscripción s
+    # está vigente en "ahora": inicio inclusive, término exclusive.
+    # "ahora" llega como argumento (no usamos datetime.now() aquí),
+    # por eso la función es pura y se puede probar con fechas inventadas.
+    return list(filter(lambda s: esta_vigente(s.inicio, s.termino, ahora), suscripciones))
