@@ -103,3 +103,20 @@ class Mensual(ModalidadCobro):
         if salida < ingreso:
             raise ValidacionError("La fecha de salida no puede ser anterior al ingreso.")
         return 0
+
+
+# Diccionario que relaciona el nombre de cada modalidad con su clase.
+# Así evitamos usar una cadena de if/elif para elegir la modalidad.
+MODALIDADES = {"minuto": PorMinuto, "diaria": Diaria, "mensual": Mensual}
+
+
+def crear_modalidad(nombre: str) -> ModalidadCobro:
+    """Devuelve un objeto de la modalidad correspondiente al nombre recibido."""
+    try:
+        # Buscamos la clase en el diccionario (sin espacios ni mayúsculas)
+        # y con los paréntesis final la instanciamos (creamos el objeto).
+        return MODALIDADES[nombre.strip().lower()]()
+    except (KeyError, AttributeError):
+        # KeyError: el nombre no está en el diccionario.
+        # AttributeError: no nos pasaron un texto (por ejemplo None).
+        raise ValidacionError(f"Modalidad desconocida: {nombre!r}.")
