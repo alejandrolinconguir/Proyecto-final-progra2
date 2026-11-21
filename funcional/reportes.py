@@ -51,3 +51,18 @@ def resumen_recaudacion(pagos, desde=None, hasta=None) -> dict:
     return {"total": total_recaudado(del_periodo),
             "por_modalidad": recaudacion_por_modalidad(del_periodo),
             "cantidad_pagos": len(del_periodo)}
+
+
+
+def pagos_a_filas(pagos):
+    """Transforma los pagos en filas de texto para mostrarlas en una tabla."""
+    # Primero ordenamos los pagos por fecha de registro.
+    # sorted recibe una lambda en "key" que le dice por qué campo ordenar.
+    ordenados = sorted(pagos, key=lambda p: p.fecha_registro)
+    # map aplica una transformación a CADA pago y devuelve su fila de texto.
+    # La lambda arma una tupla con: la fecha formateada, la modalidad y el monto con formato chileno.
+    # f"${p.monto:,}" agrega separador de miles (90,000) y .replace cambia la coma por punto (90.000).
+    return list(map(lambda p: (p.fecha_registro.strftime("%d-%m-%Y %H:%M"),
+                               p.modalidad,
+                               f"${p.monto:,}".replace(",", ".")),
+                    ordenados))
