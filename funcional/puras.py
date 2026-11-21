@@ -5,6 +5,7 @@ from dominio.errores import ValidacionError # aca traemos el error que puse agre
 
 _UN_MINUTO = timedelta(minutes=1) #Una constante que vale un minuto
 _UN_DIA = timedelta(hours=24) # Una constante que vale un bloque de 24 horas, es el bloque que usamos para cobrar por día
+DURACION_SUSCRIPCION_DIAS = 30 # Una suscripción mensual dura exactamente 30 días consecutivos
 
 
 def _techo_division(duracion: timedelta, bloque: timedelta) -> int:
@@ -34,3 +35,18 @@ def calcular_dias(ingreso: datetime, salida: datetime) -> int:
     # _duracion calcula cuánto estuvo y valida las fechas, _techo_division lo divide
     # en días redondeando hacia arriba, y max(1, ...) asegura el mínimo de 1 día.
     return max(1, _techo_division(_duracion(ingreso, salida), _UN_DIA))
+
+
+def fecha_termino_suscripcion(inicio: datetime) -> datetime:
+    """Fin (exclusivo) de una suscripción de 30 días que parte en `inicio`."""
+    # Suma 30 días a la fecha de inicio y devuelve la fecha en que termina la suscripción.
+    return inicio + timedelta(days=DURACION_SUSCRIPCION_DIAS)
+
+
+def esta_vigente(inicio: datetime, termino: datetime, ahora: datetime) -> bool:
+    """Vigente desde `inicio` (inclusive) hasta `termino` (exclusive)."""
+    # Devuelve True si "ahora" está dentro del período de la suscripción.
+    # inicio <= ahora: el inicio cuenta como vigente (inclusive).
+    # ahora < termino: en la fecha exacta de término ya NO está vigente (exclusive).
+    # La fecha de referencia "ahora" llega como argumento, por eso la función es pura.
+    return inicio <= ahora < termino
