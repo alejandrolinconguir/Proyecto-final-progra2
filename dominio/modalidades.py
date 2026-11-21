@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 from dominio.errores import ValidacionError
-from funcional.puras import calcular_minutos # Acá traemos la función pura que calcula los minutos a cobrar
+from funcional.puras import calcular_minutos, calcular_dias # Acá traemos la función pura que calcula los minutos a cobrar
 
 # Tarifas en pesos chilenos (Ojo que podemos cambiarlas pero, es más entendible asi y hay que anotarlas en el README)
 TARIFA_MINUTO = 30
@@ -64,3 +64,15 @@ class PorMinuto(ModalidadCobro):
         # Esta es SU fórmula: minutos a cobrar (redondeados hacia arriba) por la tarifa.
         # self.tarifa usa el getter de la clase padre.
         return calcular_minutos(ingreso, salida) * self.tarifa
+
+
+class Diaria(ModalidadCobro):
+    """Modalidad diaria: se cobra una tarifa fija por cada bloque de 24 horas."""
+
+    def __init__(self, tarifa: int = TARIFA_DIARIA):
+        # Igual que PorMinuto: el padre guarda y valida el nombre y la tarifa.
+        super().__init__("diaria", tarifa)
+
+    def calcular_importe(self, ingreso: datetime, salida: datetime) -> int:
+        # Su fórmula: días a cobrar (bloques de 24 h, hacia arriba) por la tarifa.
+        return calcular_dias(ingreso, salida) * self.tarifa
